@@ -14,7 +14,7 @@ login:
   nickname: 'X'
 
 keywords:
-  # Input keywords to search for (case-insensitive) separated by spaces
+  # Input keywords to search for (case-sensitive) separated by spaces
   required: 'bestbuy.ca 3060'
 
 notify:
