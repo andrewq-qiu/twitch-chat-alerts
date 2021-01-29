@@ -16,5 +16,11 @@ login:
 keywords:
   # Input keywords to search for (case-insensitive) separated by spaces
   required: 'bestbuy.ca 3060'
+
+notify:
   # URL to open in browser when keywords are satisfied
   open: 'https://docs.python.org/3/library/webbrowser.html'
+  # Sound to play when keywords are satisfied
+  sound: 'airhorn.mp3'
+  # Whether or not to print all the messages
+  print_all: true
