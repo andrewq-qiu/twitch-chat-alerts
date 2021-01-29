@@ -1,0 +1,20 @@
+# Properties for twitch-chat-streaming bot
+
+socket:
+  # Probably shouldn't change this
+  url: 'irc.chat.twitch.tv'
+  port: 6667
+
+login:
+  # Get your token from https://twitchapps.com/tmi/
+  token: ''
+  channel: '#war10ck3d'
+  # Just pick any nickname you want. It doesn't have to be associated
+  # to your twitch username
+  nickname: 'X'
+
+keywords:
+  # Input keywords to search for (case-insensitive) separated by spaces
+  required: 'bestbuy.ca 3060'
+  # URL to open in browser when keywords are satisfied
+  open: 'https://docs.python.org/3/library/webbrowser.html'
