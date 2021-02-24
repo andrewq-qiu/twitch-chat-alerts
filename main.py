@@ -17,6 +17,8 @@ import socket
 import logging
 import webbrowser
 from playsound import playsound
+import datetime
+import threading as th
 
 logging.basicConfig(level=logging.DEBUG)
 
@@ -26,39 +28,89 @@ def load_properties() -> dict:
     root = ROOT
 
     with open(root + '\properties.yml', 'r') as f:
-        data =  yaml.safe_load(f)
-        data['keywords']['req'] = data['keywords']['required'].split()
+        data = yaml.safe_load(f)
+
+        logging.info('Loaded ' + root + '\properties.yml')
+
+        logging.info('Found the following keywords: ')
+        keywords = '\nl - '.join(
+            f'({", ".join(kw for kw in kw_set["required"].split())}) opens {kw_set["open"]}'
+            for kw_set in data['keywords'])
+        logging.info(keywords)
+
         return data
 
 
 def test_beeps_and_browser():
-    webbrowser.open(PROPERTIES['notify']['open'])
+    webbrowser.open('https://google.ca')
     playsound(ROOT + '\\' + PROPERTIES['notify']['sound'])
 
 
-def run_bot():
-    try:
-        while True:
-            resp = SOCK.recv(2048).decode('utf-8')
-            if len(resp) == 0:
-                # Ignore message
-                pass
-            # Twitch will send you a PING which you
-            # will have to respond with every 5 mins
-            elif resp.startswith('PING'):
-                SOCK.send("PONG\n".encode('utf-8'))
-            else:
-                keywords_match = all(req in resp
-                                     for req in PROPERTIES['keywords']['req'])
-                if keywords_match:
-                    webbrowser.open(PROPERTIES['notify']['open'])
-                    playsound(ROOT + '\\' + PROPERTIES['notify']['sound'])
-                    logging.warning(resp)
-                elif PROPERTIES['notify']['print_all']:
-                    logging.info(resp)
+def alert(kw_set: dict[str, str]):
+    webbrowser.open(kw_set['open'])
+    playsound(ROOT + '\\' + PROPERTIES['notify']['sound'])
 
-    except KeyboardInterrupt:
-        print('Program interrupted! Re-run again')
+
+KEEP_RUNNING = True
+
+
+def keyboard_thread_init():
+    thread = th.Thread(target=keyboard_thread, args=())
+    thread.start()
+
+
+def keyboard_thread():
+    global KEEP_RUNNING
+
+    while True:
+        x = input('To escape back to the main screen, enter "q": \nl')
+
+        if x == 'q':
+            KEEP_RUNNING = False
+            return
+
+
+def run_bot():
+    # Create new thread for keyboard
+    keyboard_thread_init()
+
+    while KEEP_RUNNING:
+        resp = SOCK.recv(2048).decode('utf-8')
+        if len(resp) == 0:
+            # Ignore message
+            pass
+        # Twitch will send you a PING which you
+        # will have to respond with every 5 mins
+        elif resp.startswith('PING'):
+            SOCK.send("PONG\n".encode('utf-8'))
+        else:
+
+            for kw_set in PROPERTIES['keywords']:
+                keywords_match = all(req in resp
+                                     for req in kw_set['required'].split())
+
+                if keywords_match:
+                    alert(kw_set)
+
+            log_text = datetime.datetime.now().strftime('%H:%M:%S ') + resp
+            logging.info(log_text)
+
+
+def interface():
+    """The main UI for accessing tests and bot functionality from command line"""
+    global KEEP_RUNNING
+
+    while True:
+        x = input('Enter "test" to test sounds or "run" to run the bot: ')
+        if x == 'test':
+            test_beeps_and_browser()
+        elif x == 'run':
+            logging.info('Press "q" to return back to this menu.')
+            KEEP_RUNNING = True
+            run_bot()
+        elif x == 'q':
+            logging.info('Aborting the script...')
+            return
 
 
 # Load Properties
@@ -75,6 +127,6 @@ SOCK.send(f"NICK {PROPERTIES['login']['nickname']}\n".encode('utf-8'))
 SOCK.send(f"JOIN {PROPERTIES['login']['channel']}\n".encode('utf-8'))
 
 if __name__ == '__main__':
-    run_bot()
-    # test_beeps_and_browser()
+    breakpoint()
+    interface()
     pass

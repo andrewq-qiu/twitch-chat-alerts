@@ -11,15 +11,22 @@ login:
   channel: '#war10ck3d'
   # Just pick any nickname you want. It doesn't have to be associated
   # to your twitch username
-  nickname: 'X'
+  nickname: 'x'
 
 keywords:
-  # Input keywords to search for (case-sensitive) separated by spaces
-  required: 'bestbuy.ca 3060'
+    # Input keywords to search for (case-sensitive) separated by spaces
+
+    # Example: If bestbuy.ca and 3060 is in the same message in chat, then open the docs.python.org link
+  - required: 'bestbuy.ca 3060'
+    open: 'https://docs.python.org/3/library/webbrowser.html'
+
+    # Example: If newegg.ca and 3090 is in the same message in chat, then open the google link
+  - required: 'newegg.ca 3090'
+    open: 'https://google.ca'
+
+    # If you want more keywords, just copy the format above
 
 notify:
-  # URL to open in browser when keywords are satisfied
-  open: 'https://docs.python.org/3/library/webbrowser.html'
   # Sound to play when keywords are satisfied
   sound: 'airhorn.mp3'
   # Whether or not to print all the messages
